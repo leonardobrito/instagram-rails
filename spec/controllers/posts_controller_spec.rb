@@ -12,17 +12,18 @@ RSpec.describe PostsController, type: :controller do
     end
 
     it('should render all posts') do
-      @expected = ActiveModelSerializers::SerializableResource::new(
+      expected = ActiveModelSerializers::SerializableResource::new(
         Post.all,
         each_serializer: PostSerializer
       ).to_json
-      expect(response.body).to eq(@expected)
+      expect(response.body).to eq(expected)
     end
   end
 
   describe('#show') do
     context('when post exists') do
       let(:post) { create :post, :with_image }
+      let(:image_name) { 'box-juice.png' }
       before do
         get :show, params: { id: post.id }
       end
@@ -31,9 +32,15 @@ RSpec.describe PostsController, type: :controller do
         expect(response).to have_http_status(:ok)
       end
       
-      it('should render the post') do
-        @expected = PostSerializer.new(post).to_json
-        expect(response.body).to eq(@expected)
+      it('should contains all post fields') do
+        post_json = JSON.parse(response.body)
+        expect(post_json['_id']).to eq(post.id)
+        expect(post_json['author']).to eq(post.author)
+        expect(post_json['place']).to eq(post.place)
+        expect(post_json['description']).to eq(post.description)
+        expect(post_json['hashtags']).to eq(post.hashtags)
+        body_image_name = post_json['image'].split('/').last
+        expect(body_image_name).to eq(image_name)
       end
     end
 
@@ -73,7 +80,7 @@ RSpec.describe PostsController, type: :controller do
         expect(response).to have_http_status(:created)
       end
 
-      it('should have expected post') do
+      it('should have expected post fields') do
         post_json = JSON.parse(response.body)
         expect(post_json['author']).to eq(expected_post.author)
         expect(post_json['place']).to eq(expected_post.place)
