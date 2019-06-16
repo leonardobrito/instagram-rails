@@ -1,6 +1,7 @@
 class PostSerializer < ActiveModel::Serializer
   attributes :_id, :author, :place, :description, :hashtags, :image, :likes, :createdAt, :updatedAt
-
+  has_many :comments
+  
   def _id
     self.object.id
   end

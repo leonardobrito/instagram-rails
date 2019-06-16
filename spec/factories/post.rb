@@ -1,16 +1,17 @@
+require 'faker'
 include ActionDispatch::TestProcess
 FactoryBot.define do
   factory :post do
-    author { "some author" }
-    place { "some place" }
-    description { "some description" }
-    hashtags { "#some_hashtags" }
+    author { Faker::Name.name }
+    place { Faker::Address.city }
+    description { Faker::Lorem.sentence }
+    hashtags { Faker::Color.hex_color }
     
     trait :other_post do
-      author { "other author" }
-      place { "other place" }
-      description { "other description" }
-      hashtags { "#other_hashtags" }
+      author { Faker::Name.name }
+      place { Faker::Address.city }
+      description { Faker::Lorem.sentence }
+      hashtags { Faker::Color.hex_color }
     end
 
     trait :with_image do
@@ -21,5 +22,14 @@ FactoryBot.define do
       end
     end
   
+    trait :with_comments do
+      transient do
+        comments_count { 5 }
+      end
+
+      after(:create) do |post, evaluator|
+        create_list(:comment, evaluator.comments_count, post: post)
+      end
+    end
   end
 end

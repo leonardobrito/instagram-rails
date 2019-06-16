@@ -35,6 +35,8 @@ group :development, :test do
   gem 'rspec-rails'
   # Factory Bot
   gem "factory_bot_rails"
+  # Faker
+  gem 'faker'
 end
 
 group :development do

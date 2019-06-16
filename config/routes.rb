@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :comments
   default_url_options :host => ENV['DEFAULT_URL_OPTIONS']
   root to: 'application#index'
   resources :posts
