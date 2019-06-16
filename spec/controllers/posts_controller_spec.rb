@@ -65,16 +65,10 @@ RSpec.describe PostsController, type: :controller do
     let(:file) { fixture_file_upload(file_path, 'image/png') }
     
     context 'when post is created' do
-      let(:attrs_post) {attributes_for :post, image: file }
-      let(:expected_post) { build :post, :with_image }
+      let(:attrs_post) { attributes_for :post, image: file }
+      let(:expected_post) { attributes_for :post, image: file }
       before do
-        post :create, params: { 
-          author: expected_post.author, 
-          place: expected_post.place,
-          description: expected_post.description,
-          hashtags: expected_post.hashtags,
-          image: file
-        }
+        post :create, params: expected_post
       end
 
       it 'should have http status :created' do
@@ -82,11 +76,12 @@ RSpec.describe PostsController, type: :controller do
       end
 
       it 'should have expected post fields' do
+        expected = expected_post.as_json
         post_json = JSON.parse(response.body)
-        expect(post_json['author']).to eq(expected_post.author)
-        expect(post_json['place']).to eq(expected_post.place)
-        expect(post_json['description']).to eq(expected_post.description)
-        expect(post_json['hashtags']).to eq(expected_post.hashtags)
+        expect(post_json['author']).to eq(expected['author'])
+        expect(post_json['place']).to eq(expected['place'])
+        expect(post_json['description']).to eq(expected['description'])
+        expect(post_json['hashtags']).to eq(expected['hashtags'])
       end
 
       it 'should contains the image_name on image' do
