@@ -31,7 +31,7 @@ RSpec.describe PostsController, type: :controller do
       it 'should have http status :ok' do
         expect(response).to have_http_status(:ok)
       end
-      
+
       it 'should contains all post fields' do
         post_json = JSON.parse(response.body)
         expect(post_json['_id']).to eq(post.id)
@@ -61,9 +61,9 @@ RSpec.describe PostsController, type: :controller do
 
   describe 'POST #create' do
     let(:image_name) { 'box-juice.png' }
-    let(:file_path) { Rails.root.join('spec', 'support', 'assets', image_name) }  
+    let(:file_path) { Rails.root.join('spec', 'support', 'assets', image_name) }
     let(:file) { fixture_file_upload(file_path, 'image/png') }
-    
+
     context 'when post is created' do
       let(:attrs_post) { attributes_for :post, image: file }
       let(:expected_post) { attributes_for :post, image: file }
@@ -90,19 +90,19 @@ RSpec.describe PostsController, type: :controller do
       end
 
       it "should increment the count by 1" do
-        expect{ 
+        expect{
           post :create, params: attrs_post
         }.to change { Post.count }.by(1)
-      end 
+      end
     end
-    
+
     context 'when post is not create' do
       context 'when author is empty' do
         before do
           post :create, params: {}
         end
 
-        it 'should have http status :unprocessable_entity' do 
+        it 'should have http status :unprocessable_entity' do
           expect(response).to have_http_status(:unprocessable_entity)
         end
 
@@ -117,15 +117,15 @@ RSpec.describe PostsController, type: :controller do
     context 'when author already has been taken' do
       let(:expected_post) { create :post, :with_image }
       before do
-        post :create, params: { 
-          author: expected_post.author, 
+        post :create, params: {
+          author: expected_post.author,
           place: expected_post.place,
           description: expected_post.description,
           hashtags: expected_post.hashtags,
           image: file
         }
       end
-      
+
       it 'should have http status :unprocessable_entity' do
         expect(response).to have_http_status(:unprocessable_entity)
       end
@@ -140,21 +140,23 @@ RSpec.describe PostsController, type: :controller do
 
   describe 'PUT #update' do
     let(:post) { create :post, :with_image }
-    let(:other_post) { build :post, :other_post }
+    let(:other_post) { build :post }
+    let!(:third_post) { create :post }
     let(:other_image_name) { 'other-box-juice.png' }
     let(:file_path) { Rails.root.join('spec', 'support', 'assets', other_image_name) }
     let(:other_file) { fixture_file_upload(file_path, 'image/png') }
     let(:attrs_post) { attributes_for :post, id: post.id, image: other_file }
+    let(:third_file) { fixture_file_upload(file_path, 'image/png') }
 
-    context 'when post is successfully update' do
+    context 'when post is successfully updated' do
       before do
-        put :update, params: { 
-          id: post.id, 
-          author: other_post.author, 
+        put :update, params: {
+          id: post.id,
+          author: other_post.author,
           place: other_post.place,
           description: other_post.description,
           hashtags: other_post.hashtags,
-          image: other_file 
+          image: other_file
         }
       end
 
@@ -177,9 +179,19 @@ RSpec.describe PostsController, type: :controller do
       end
 
       it "should not increment the count by 1" do
-        expect{ 
-          put :update, params: attrs_post
-        }.to change { Post.count }.by(0)
+        new_post = build(:post)
+
+        initial_post_description = third_post.description
+        expect{
+          put :update, params: {
+            id: third_post.id,
+            author: new_post.author,
+            place: new_post.place,
+            description: new_post.description,
+            hashtags: new_post.hashtags,
+            image: other_file
+          }
+        }.to change { third_post.reload.description }.from(initial_post_description).to(new_post.description)
       end
     end
 
@@ -198,17 +210,17 @@ RSpec.describe PostsController, type: :controller do
 
       context 'when author has already been taken' do
         let(:post) { create :post, :with_image }
-        let(:other_post) { create :post, :other_post }
-        let(:third_post) { build :post, :other_post, { author: post.author } }
+        let(:other_post) { create :post }
+        let(:third_post) { build :post, { author: post.author } }
 
         before do
-          put :update, params: { 
-            id: other_post.id, 
-            author: third_post.author, 
+          put :update, params: {
+            id: other_post.id,
+            author: third_post.author,
             place: third_post.place,
             description: third_post.description,
             hashtags: third_post.hashtags,
-            image: other_file 
+            image: other_file
           }
         end
 
@@ -230,7 +242,7 @@ RSpec.describe PostsController, type: :controller do
       before do
         delete :destroy, params: { id: post.id }
       end
-      
+
       it 'should have http status :no_content' do
         expect(response).to have_http_status(:no_content)
       end
