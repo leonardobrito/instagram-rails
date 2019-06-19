@@ -55,3 +55,7 @@ gem 'active_model_serializers'
  
 # Pry is a runtime developer console and IRB alternative
 gem 'pry'
+
+# CORS
+gem 'rack-cors'
+
