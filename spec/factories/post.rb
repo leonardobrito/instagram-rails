@@ -2,17 +2,10 @@ require 'faker'
 include ActionDispatch::TestProcess
 FactoryBot.define do
   factory :post do
-    author { Faker::Name.name }
-    place { Faker::Address.city }
+    author { Faker::Name.unique.name }
+    place { Faker::Address.unique.city }
     description { Faker::Lorem.sentence }
     hashtags { Faker::Color.hex_color }
-    
-    trait :other_post do
-      author { Faker::Name.name }
-      place { Faker::Address.city }
-      description { Faker::Lorem.sentence }
-      hashtags { Faker::Color.hex_color }
-    end
 
     trait :with_image do
       after :create do |post_image|
@@ -21,7 +14,7 @@ FactoryBot.define do
         post_image.image.attach(file)
       end
     end
-  
+
     trait :with_comments do
       transient do
         comments_count { 5 }
